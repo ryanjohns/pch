@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>P.C.H.</title>
+    <link rel="apple-touch-icon" href="pch-apple-touch-icon.png" />
+    <style>
+      body {
+        background-color: #333;
+        color: #fff;
+        font-family: "Marker Felt", Helvetica;
+        margin-bottom: 20px;
+      }
+
+      img {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 100px;
+        width: 40%;
+      }
+
+      h1, h2, h3 {
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 80px;
+        padding: 0px;
+        margin: 100px 0px 100px 0px;
+        opacity: 0;
+      }
+
+      h2 {
+        font-size: 50px;
+        text-decoration-line: underline;
+        text-decoration-thickness: 2px;
+        padding: 0px;
+        margin: 100px 0px 10px 0px;
+      }
+
+      h3 {
+        font-size: 40px;
+        padding: 0px;
+        margin: 3px 0px 0px 0px;
+      }
+    </style>
+
+    <script>
+      const COCKTAILS = {
+        "Gin": [
+          "OH Snap!",
+          "Honey Hole",
+          "Pinky Promises",
+          "Leeward Negroni"
+        ],
+        "Agave": [
+          "Sunnyside",
+          "Fo' Swizzle",
+          "Saffron",
+          "It's Tricky"
+        ],
+        "Rum": [
+          "One Way Ticket",
+          "Cane Jane",
+          "Turn down for nut",
+          "Miso Old Fashioned",
+          "Maria Carolina"
+        ],
+        "Whiskey": [
+          "Thrilla in Manila",
+          "Kung Fu Pandan",
+          "Chimpan-Chiote",
+          "Rump Shaker",
+          "Eggplant Wizard",
+          "Maximum Effort",
+          "Back in Black",
+          "Extra Fancy"
+        ],
+        "Brandy": [
+          "Kinako Sidecar",
+          "Lucky Melon",
+          "Tuk Tuk Tea",
+          "Jean-Claude Pandan"
+        ],
+        "Vodka": [
+          "Hall Pass",
+          "Double Dutch",
+          "Porn Star Martini",
+          "Lime in da Coconut"
+        ],
+        "Sherry-Sake-Shochu": [
+          "Shogun",
+          "Salary Man",
+          "Sherry Cobbler"
+        ]
+      };
+      const SPIRITS = Object.keys(COCKTAILS);
+
+      var fadeTimeout = 0;
+
+      function populateMenu() {
+        let menu = document.getElementById("menu");
+        for (let spirit in COCKTAILS) {
+          let spiritHeader = document.createElement("h2");
+          spiritHeader.innerHTML = spirit;
+          menu.appendChild(spiritHeader);
+          COCKTAILS[spirit].forEach(function(cocktail) {
+            let cocktailHeader = document.createElement("h3");
+            cocktailHeader.innerHTML = cocktail;
+            menu.appendChild(cocktailHeader);
+          });
+        }
+      }
+
+      function pickCocktail() {
+        clearTimeout(fadeTimeout);
+        let spiritIndex = Math.floor(Math.random() * SPIRITS.length);
+        let cocktailIndex = Math.floor(Math.random() * COCKTAILS[SPIRITS[spiritIndex]].length);
+        let randomCocktail = document.getElementById("randomCocktail");
+        randomCocktail.style.opacity = 0;
+        randomCocktail.innerHTML = COCKTAILS[SPIRITS[spiritIndex]][cocktailIndex];
+        randomCocktail.style.opacity = 1;
+        fadeTimeout = setTimeout(fadeAway, 1500);
+      }
+
+      function fadeAway() {
+        let randomCocktail = document.getElementById("randomCocktail");
+        let opacity = randomCocktail.style.opacity - 0.1;
+        randomCocktail.style.opacity = opacity;
+        if (opacity > 0) {
+          fadeTimeout = setTimeout(fadeAway, 50);
+        }
+      }
+    </script>
+  </head>
+
+  <body onload="populateMenu();">
+    <h1 id="randomCocktail">&nbsp;</h1>
+    <img src="pch-logo.png" alt="P.C.H. Logo" onclick="pickCocktail();" />
+    <div id="menu"></div>
+  </body>
+</html>
+
