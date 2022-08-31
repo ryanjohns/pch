@@ -11,11 +11,22 @@
         margin-bottom: 20px;
       }
 
+      #anchor {
+        position: fixed;
+        overflow: auto;
+        top: 0;
+        background-color: #333;
+      }
+
+      #menu {
+        margin-top: 670px;
+      }
+
       img {
         display: block;
         margin-left: auto;
         margin-right: auto;
-        margin-bottom: 100px;
+        margin-bottom: 50px;
         width: 40%;
       }
 
@@ -36,6 +47,10 @@
         text-decoration-thickness: 2px;
         padding: 0px;
         margin: 100px 0px 10px 0px;
+      }
+
+      h2:first-child {
+        margin-top: 0px;
       }
 
       h3 {
@@ -102,6 +117,9 @@
         let menu = document.getElementById("menu");
         for (let spirit in COCKTAILS) {
           let spiritHeader = document.createElement("h2");
+          spiritHeader.addEventListener("click", function() {
+            pickCocktailWithSpirit(spirit);
+          });
           spiritHeader.innerHTML = spirit;
           menu.appendChild(spiritHeader);
           COCKTAILS[spirit].forEach(function(cocktail) {
@@ -113,14 +131,18 @@
       }
 
       function pickCocktail() {
-        clearTimeout(fadeTimeout);
         let spiritIndex = Math.floor(Math.random() * SPIRITS.length);
-        let cocktailIndex = Math.floor(Math.random() * COCKTAILS[SPIRITS[spiritIndex]].length);
+        pickCocktailWithSpirit(SPIRITS[spiritIndex]);
+      }
+
+      function pickCocktailWithSpirit(spirit) {
+        clearTimeout(fadeTimeout);
+        let cocktailIndex = Math.floor(Math.random() * COCKTAILS[spirit].length);
         let randomCocktail = document.getElementById("randomCocktail");
         randomCocktail.style.opacity = 0;
-        randomCocktail.innerHTML = COCKTAILS[SPIRITS[spiritIndex]][cocktailIndex];
+        randomCocktail.innerHTML = COCKTAILS[spirit][cocktailIndex];
         randomCocktail.style.opacity = 1;
-        fadeTimeout = setTimeout(fadeAway, 1500);
+        fadeTimeout = setTimeout(fadeAway, 3000);
       }
 
       function fadeAway() {
@@ -135,8 +157,10 @@
   </head>
 
   <body onload="populateMenu();">
-    <h1 id="randomCocktail">&nbsp;</h1>
-    <img src="pch-logo.png" alt="P.C.H. Logo" onclick="pickCocktail();" />
+    <div id="anchor">
+      <h1 id="randomCocktail">&nbsp;</h1>
+      <img src="pch-logo.png" alt="P.C.H. Logo" onclick="pickCocktail();" />
+    </div>
     <div id="menu"></div>
   </body>
 </html>
