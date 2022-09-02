@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>P.C.H.</title>
+    <title>PCH Roulette</title>
     <link rel="apple-touch-icon" href="pch-apple-touch-icon.png" />
     <style>
       body {
@@ -58,6 +58,12 @@
         padding: 0px;
         margin: 3px 0px 0px 0px;
       }
+
+      .consumed {
+        text-decoration: line-through;
+        text-decoration-thickness: 10px;
+        text-decoration-color: #cc9900;
+      }
     </style>
 
     <script>
@@ -109,49 +115,121 @@
           "Sherry Cobbler"
         ]
       };
-      const SPIRITS = Object.keys(COCKTAILS);
 
       var fadeTimeout = 0;
 
       function populateMenu() {
-        let menu = document.getElementById("menu");
+        const menu = document.getElementById("menu");
         for (let spirit in COCKTAILS) {
-          let spiritHeader = document.createElement("h2");
+          // initialize local storage
+          let consumedCocktails = [];
+          const consumedCocktailsString = localStorage.getItem(spirit);
+          if (consumedCocktailsString) {
+            consumedCocktails = JSON.parse(consumedCocktailsString);
+          } else {
+            localStorage.setItem(spirit, JSON.stringify([]));
+          }
+
+          // prune any drinks that have been removed from the menu
+          if (consumedCocktails.length > 0) {
+            const prunedCocktails = consumedCocktails.filter(function(c) {
+              return COCKTAILS[spirit].includes(c);
+            });
+            consumedCocktails = prunedCocktails;
+            localStorage.setItem(spirit, JSON.stringify(consumedCocktails));
+          }
+
+          // add spirit headers with onclick listener to pick a cocktail with this base spirit
+          const spiritHeader = document.createElement("h2");
           spiritHeader.addEventListener("click", function() {
-            pickCocktailWithSpirit(spirit);
+            pickCocktail(spirit);
           });
           spiritHeader.innerHTML = spirit;
           menu.appendChild(spiritHeader);
+
+          // add each cocktail
           COCKTAILS[spirit].forEach(function(cocktail) {
-            let cocktailHeader = document.createElement("h3");
+            const cocktailHeader = document.createElement("h3");
             cocktailHeader.innerHTML = cocktail;
+            cocktailHeader.id = htmlSafe(cocktail);
+            cocktailHeader.classList.add(htmlSafe(spirit));
+            if (consumedCocktails.includes(cocktail)) {
+              cocktailHeader.classList.add("consumed");
+            }
+
+            // add onclick listener to toggle the consumed status of this cocktail
+            cocktailHeader.addEventListener("click", function() {
+              const newConsumedCocktails = JSON.parse(localStorage.getItem(spirit));
+              const idx = newConsumedCocktails.indexOf(cocktail);
+              if (idx > -1) {
+                newConsumedCocktails.splice(idx);
+                this.classList.remove("consumed");
+              } else {
+                newConsumedCocktails.push(cocktail);
+                this.classList.add("consumed");
+              }
+              localStorage.setItem(spirit, JSON.stringify(newConsumedCocktails));
+            });
+
             menu.appendChild(cocktailHeader);
           });
         }
       }
 
-      function pickCocktail() {
-        let spiritIndex = Math.floor(Math.random() * SPIRITS.length);
-        pickCocktailWithSpirit(SPIRITS[spiritIndex]);
-      }
-
-      function pickCocktailWithSpirit(spirit) {
+      function pickCocktail(spirit) {
+        // reset fade away animation and clear the random cocktail display
         clearTimeout(fadeTimeout);
-        let cocktailIndex = Math.floor(Math.random() * COCKTAILS[spirit].length);
-        let randomCocktail = document.getElementById("randomCocktail");
+        const randomCocktail = document.getElementById("randomCocktail");
         randomCocktail.style.opacity = 0;
-        randomCocktail.innerHTML = COCKTAILS[spirit][cocktailIndex];
+
+        // determine which cocktails have not been consumed
+        const availableCocktailsBySpirit = [];
+        const spiritsPool = (spirit == null ? Object.keys(COCKTAILS) : [spirit]);
+        spiritsPool.forEach(function(s) {
+          const all = COCKTAILS[s];
+          const consumed = JSON.parse(localStorage.getItem(s));
+          const available = all.filter(function(c) {
+            return !consumed.includes(c);
+          });
+          if (available.length > 0) {
+            availableCocktailsBySpirit.push([s, available]);
+          }
+        });
+
+        // reset consumed cocktails if necessary
+        if (availableCocktailsBySpirit.length == 0) {
+          spiritsPool.forEach(function(s) {
+            const cocktailHeaders = document.getElementsByClassName(htmlSafe(s));
+            for (let i = 0; i < cocktailHeaders.length; i++) {
+              cocktailHeaders[i].classList.remove("consumed");
+            }
+            localStorage.setItem(s, JSON.stringify([]));
+            availableCocktailsBySpirit.push([s, COCKTAILS[s]]);
+          });
+        }
+
+        // pick a cocktail
+        const spiritIndex = Math.floor(Math.random() * availableCocktailsBySpirit.length);
+        const cocktailIndex = Math.floor(Math.random() * availableCocktailsBySpirit[spiritIndex][1].length);
+        const pickedSpirit = availableCocktailsBySpirit[spiritIndex][0];
+        const pickedCocktail = availableCocktailsBySpirit[spiritIndex][1][cocktailIndex];
+        document.getElementById(htmlSafe(pickedCocktail)).click();
+        randomCocktail.innerHTML = pickedCocktail;
         randomCocktail.style.opacity = 1;
         fadeTimeout = setTimeout(fadeAway, 3000);
       }
 
       function fadeAway() {
-        let randomCocktail = document.getElementById("randomCocktail");
-        let opacity = randomCocktail.style.opacity - 0.1;
+        const randomCocktail = document.getElementById("randomCocktail");
+        const opacity = randomCocktail.style.opacity - 0.1;
         randomCocktail.style.opacity = opacity;
         if (opacity > 0) {
           fadeTimeout = setTimeout(fadeAway, 50);
         }
+      }
+
+      function htmlSafe(str) {
+        return str.replace(/\W/g, "");
       }
     </script>
   </head>
@@ -159,7 +237,7 @@
   <body onload="populateMenu();">
     <div id="anchor">
       <h1 id="randomCocktail">&nbsp;</h1>
-      <img src="pch-logo.png" alt="P.C.H. Logo" onclick="pickCocktail();" />
+      <img src="pch-logo.png" alt="P.C.H. Logo" onclick="pickCocktail(null);" />
     </div>
     <div id="menu"></div>
   </body>
