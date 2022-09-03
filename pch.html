@@ -40,6 +40,10 @@
         padding: 0px;
       }
 
+      h1:active, h2:active, h3:active {
+        color: #cc9900;
+      }
+
       h1 {
         font-size: 6rem;
         margin: 100px 0px;
@@ -66,6 +70,10 @@
         text-decoration: line-through;
         text-decoration-thickness: 10px;
         text-decoration-color: #cc9900;
+      }
+
+      .active {
+        color: #cc9900;
       }
     </style>
 
@@ -147,6 +155,18 @@
           spiritHeader.addEventListener("click", function() {
             pickCocktail(spirit);
           });
+          spiritHeader.addEventListener("touchstart", function() {
+            setTouchActive(this);
+          });
+          spiritHeader.addEventListener("touchend", function() {
+            setTouchInactive(this);
+          });
+          spiritHeader.addEventListener("touchmove", function() {
+            setTouchInactive(this);
+          });
+          spiritHeader.addEventListener("touchcancel", function() {
+            setTouchInactive(this);
+          });
           spiritHeader.innerHTML = spirit;
           menu.appendChild(spiritHeader);
 
@@ -174,9 +194,43 @@
               localStorage.setItem(spirit, JSON.stringify(newConsumedCocktails));
             });
 
+            // add touch listeners for tap feedback
+            cocktailHeader.addEventListener("touchstart", function() {
+              setTouchActive(this);
+            });
+            cocktailHeader.addEventListener("touchend", function() {
+              setTouchInactive(this);
+            });
+            cocktailHeader.addEventListener("touchmove", function() {
+              setTouchInactive(this);
+            });
+            cocktailHeader.addEventListener("touchcancel", function() {
+              setTouchInactive(this);
+            });
+
             menu.appendChild(cocktailHeader);
           });
         }
+
+        // add event listeners to the reset button
+        const resetBtn = document.getElementById("resetBtn");
+        resetBtn.addEventListener("click", function() {
+          Object.keys(COCKTAILS).forEach(function(spirit) {
+            resetConsumedSpirit(spirit);
+          });
+        });
+        resetBtn.addEventListener("touchstart", function() {
+          setTouchActive(this);
+        });
+        resetBtn.addEventListener("touchend", function() {
+          setTouchInactive(this);
+        });
+        resetBtn.addEventListener("touchmove", function() {
+          setTouchInactive(this);
+        });
+        resetBtn.addEventListener("touchcancel", function() {
+          setTouchInactive(this);
+        });
       }
 
       function pickCocktail(spirit) {
@@ -218,12 +272,6 @@
         fadeTimeout = setTimeout(fadeAway, 3000);
       }
 
-      function resetAllConsumedSpirits() {
-        Object.keys(COCKTAILS).forEach(function(spirit) {
-          resetConsumedSpirit(spirit);
-        });
-      }
-
       function resetConsumedSpirit(spirit) {
         const cocktailHeaders = document.getElementsByClassName(htmlSafe(spirit));
         for (let i = 0; i < cocktailHeaders.length; i++) {
@@ -241,6 +289,14 @@
         }
       }
 
+      function setTouchActive(element) {
+        element.classList.add("active");
+      }
+
+      function setTouchInactive(element) {
+        element.classList.remove("active");
+      }
+
       function htmlSafe(str) {
         return str.replace(/\W/g, "");
       }
@@ -254,7 +310,7 @@
     </div>
     <div id="menu"></div>
     <div id="reset">
-      <h3 onclick="resetAllConsumedSpirits();">[reset]</h3>
+      <h3 id="resetBtn">[reset]</h3>
     </div>
   </body>
 </html>
