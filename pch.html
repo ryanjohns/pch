@@ -21,7 +21,10 @@
 
       #menu {
         margin-top: calc(10rem + 550px);
-        margin-bottom: 100px;
+      }
+
+      #reset {
+        margin: 100px 0px;
       }
 
       img {
@@ -199,11 +202,7 @@
         // reset consumed cocktails if necessary
         if (availableCocktailsBySpirit.length == 0) {
           spiritsPool.forEach(function(s) {
-            const cocktailHeaders = document.getElementsByClassName(htmlSafe(s));
-            for (let i = 0; i < cocktailHeaders.length; i++) {
-              cocktailHeaders[i].classList.remove("consumed");
-            }
-            localStorage.setItem(s, JSON.stringify([]));
+            resetConsumedSpirit(s);
             availableCocktailsBySpirit.push([s, COCKTAILS[s]]);
           });
         }
@@ -217,6 +216,20 @@
         randomCocktail.innerHTML = pickedCocktail;
         randomCocktail.style.opacity = 1;
         fadeTimeout = setTimeout(fadeAway, 3000);
+      }
+
+      function resetAllConsumedSpirits() {
+        Object.keys(COCKTAILS).forEach(function(spirit) {
+          resetConsumedSpirit(spirit);
+        });
+      }
+
+      function resetConsumedSpirit(spirit) {
+        const cocktailHeaders = document.getElementsByClassName(htmlSafe(spirit));
+        for (let i = 0; i < cocktailHeaders.length; i++) {
+          cocktailHeaders[i].classList.remove("consumed");
+        }
+        localStorage.setItem(spirit, JSON.stringify([]));
       }
 
       function fadeAway() {
@@ -240,6 +253,9 @@
       <img src="pch-logo.png" alt="P.C.H. Logo" onclick="pickCocktail(null);" />
     </div>
     <div id="menu"></div>
+    <div id="reset">
+      <h3 onclick="resetAllConsumedSpirits();">[reset]</h3>
+    </div>
   </body>
 </html>
 
